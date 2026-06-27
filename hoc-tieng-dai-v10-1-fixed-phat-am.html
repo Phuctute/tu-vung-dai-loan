@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Từ Vựng Tiếng Đài V10</title>
+<style>
+body{margin:0;background:#eef3f8;font-family:Arial,sans-serif}
+.header{background:linear-gradient(135deg,#1e3d59,#5b87b5);color:#fff;text-align:center;padding:14px;border-radius:0 0 32px 32px}
+.header h1{margin:0;font-size:30px}
+.name{font-size:20px;margin-top:6px}
+.wrap{padding:2px}
+.tablebox{background:#fff;border-radius:14px;overflow:hidden;margin:4px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+table{width:100%;border-collapse:collapse}
+th{background:#22b894;color:#fff;padding:12px;font-size:18px}
+td{padding:10px 6px;border-top:1px solid #eee;text-align:center}
+.hanzi{font-size:28px;font-weight:700;color:#17324f;white-space:nowrap}
+.pinyin{font-size:17px}
+.mean{font-size:15px;color:#555}
+.selected{background:#d7f5e8}
+.fab{position:fixed;right:14px;bottom:14px;width:56px;height:56px;border:none;border-radius:50%;background:#ff6e40;color:#fff;font-size:28px}
+.sheet{position:fixed;left:0;right:0;bottom:-500px;background:#fff;border-radius:24px 24px 0 0;padding:20px;transition:.3s}
+.sheet.show{bottom:0}
+.item{padding:14px;border-bottom:1px solid #eee}
+.end{height:140px;text-align:center;color:#666;padding-top:20px}
+.flash{position:fixed;inset:0;background:#eef3f8;display:none;padding:20px}
+.card{background:#fff;border-radius:24px;height:65vh;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.big{font-size:64px;font-weight:700;color:#17324f}
+.small{font-size:24px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="header"><h1>🇹🇼 Từ Vựng Tiếng Đài</h1><div class="name">武維福</div></div>
+
+<div class="wrap"><div class="tablebox">
+<table><thead><tr><th width="25%">Chữ Hán</th><th width="20%">Phiên Âm</th><th width="55%">Nghĩa</th></tr></thead>
+<tbody id="tb"></tbody></table>
+</div></div>
+
+<div class="end"><div id="count"></div></div>
+
+<button class="fab" onclick="menu()">☰</button>
+
+<div class="sheet" id="menu">
+<div class="item" onclick="addRow()">➕ Thêm dòng</div>
+<div class="item" onclick="pasteBulk()">📋 Dán hàng loạt</div>
+<div class="item" onclick="toggleSelect()">☑ Chọn</div>
+<div class="item" onclick="editSelected()">✏️ Sửa</div>
+<div class="item" onclick="flashcard()">🃏 Flashcard</div>
+<div class="item" onclick="exportData()">📄 Xuất Google Sheet</div>
+<div class="item" onclick="deleteSelected()">🗑 Xóa</div>
+<div class="item" onclick="menu()">✕ Đóng</div>
+</div>
+
+<div class="flash" id="flash">
+<div class="card" onclick="flip()">
+<div id="front">
+<div class="big" id="fh"></div>
+<div class="small">Bấm để lật thẻ</div>
+</div>
+<div id="back" style="display:none">
+<div class="small" id="fp"></div>
+<div class="small" id="fm"></div>
+</div>
+</div>
+<div style="margin-top:18px;text-align:center">
+<button onclick="prev()" style="font-size:26px;padding:8px 16px;">◀</button>
+<button onclick="playFlash()" style="font-size:26px;padding:8px 16px;">🔊</button>
+<button onclick="next()" style="font-size:26px;padding:8px 16px;">▶</button>
+<button onclick="closeFlash()" style="font-size:26px;padding:8px 16px;">✕</button>
+</div>
+</div>
+
+<script>
+let female=true,selectMode=false;
+let selected=new Set();
+let data=JSON.parse(localStorage.getItem('twv10')||'[]');
+if(!data.length)data=[{id:1,h:'你好',p:'Nǐ hǎo',m:'Xin chào'}];
+
+function speak(t){let u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=.45;u.pitch=female?1.3:.7;female=!female;speechSynthesis.speak(u);}
+function save(){localStorage.setItem('twv10',JSON.stringify(data));}
+function render(){
+tb.innerHTML='';
+data.forEach(r=>{
+let tr=document.createElement('tr');
+if(selected.has(r.id))tr.className='selected';
+tr.innerHTML=`<td class=hanzi>${r.h}</td><td class=pinyin>${r.p}</td><td class=mean>${r.m}</td>`;
+tr.onclick=()=>{if(selectMode){selected.has(r.id)?selected.delete(r.id):selected.add(r.id);render();}else speak(r.h)};
+tb.appendChild(tr);
+});
+count.innerHTML='📚 Tổng số từ: '+data.length;
+save();
+}
+function menu(){document.getElementById('menu').classList.toggle('show');}
+function addRow(){data.unshift({id:Date.now(),h:'',p:'',m:''});render();menu();}
+function pasteBulk(){let t=prompt('Dán dữ liệu');if(!t)return;t.split('\n').forEach(l=>{let p=l.split('\t');if(p.length>=3)data.push({id:Date.now()+Math.random(),h:p[0],p:p[1],m:p[2]})});render();menu();}
+function toggleSelect(){selectMode=!selectMode;if(!selectMode)selected.clear();render();menu();}
+function editSelected(){
+if(selected.size!=1){alert('Chọn 1 dòng để sửa');return;}
+let id=[...selected][0],r=data.find(x=>x.id==id);
+r.h=prompt('Chữ Hán',r.h)||r.h;
+r.p=prompt('Phiên Âm',r.p)||r.p;
+r.m=prompt('Nghĩa',r.m)||r.m;
+selected.clear();render();menu();
+}
+function deleteSelected(){data=data.filter(x=>!selected.has(x.id));selected.clear();render();menu();}
+function exportData(){navigator.clipboard.writeText(data.map(x=>x.h+'\t'+x.p+'\t'+x.m).join('\n'));alert('Đã copy');}
+
+let fi=0,showFront=true;
+let flashData=[];
+
+function shuffleArray(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}
+return arr;
+}
+
+function flashcard(){
+flashData = selected.size
+? data.filter(x=>selected.has(x.id))
+: [...data];
+
+if(!flashData.length){alert('Không có dữ liệu để học');return;}
+
+shuffleArray(flashData);
+fi=0;
+
+document.getElementById('flash').style.display='block';
+loadCard();
+menu();
+}
+
+function loadCard(){
+if(!flashData.length)return;
+fh.innerText=flashData[fi].h;
+fp.innerText=flashData[fi].p;
+fm.innerText=flashData[fi].m;
+front.style.display='block';
+back.style.display='none';
+showFront=true;
+}
+
+function flip(){showFront=!showFront;front.style.display=showFront?'block':'none';back.style.display=showFront?'none':'block';}
+function next(){fi=(fi+1)%flashData.length;loadCard();}
+function prev(){fi=(fi-1+flashData.length)%flashData.length;loadCard();}
+function playFlash(){if(flashData.length)speak(flashData[fi].h);}
+function closeFlash(){flash.style.display='none';}
+
+render();
+</script>
+</body></html>
