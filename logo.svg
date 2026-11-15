@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,.25)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="120" ry="120" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity=".06">
+    <line x1="0" y1="170" x2="512" y2="170" stroke="#fff" stroke-width="1"/>
+    <line x1="0" y1="340" x2="512" y2="340" stroke="#fff" stroke-width="1"/>
+    <line x1="170" y1="0" x2="170" y2="512" stroke="#fff" stroke-width="1"/>
+    <line x1="340" y1="0" x2="340" y2="512" stroke="#fff" stroke-width="1"/>
+  </g>
+
+  <!-- Decorative circles -->
+  <circle cx="110" cy="110" r="60" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="2"/>
+  <circle cx="402" cy="402" r="80" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+  <circle cx="402" cy="110" r="40" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
+
+  <!-- Main character: 語 (language/speech) -->
+  <text x="256" y="310" text-anchor="middle" font-family="'Noto Serif SC','PingFang SC','STSong',serif" font-size="240" font-weight="900" fill="#fff" filter="url(#glow)" letter-spacing="0">語</text>
+
+  <!-- Shine overlay -->
+  <rect width="512" height="256" rx="120" ry="120" fill="url(#shine)"/>
+
+  <!-- Subtle bottom accent bar -->
+  <rect x="156" y="430" width="200" height="5" rx="3" fill="rgba(255,255,255,.35)"/>
+</svg>
